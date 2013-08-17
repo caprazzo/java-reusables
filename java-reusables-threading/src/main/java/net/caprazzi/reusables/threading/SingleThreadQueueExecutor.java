@@ -1,6 +1,7 @@
 package net.caprazzi.reusables.threading;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    protected SingleThreadQueueExecutor(String name) {
+    protected SingleThreadQueueExecutor() {
         Log = LoggerFactory.getLogger(this.getClass());
     }
 
@@ -61,7 +62,7 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
         });
     }
 
-    public final ElementListenableFuture enqueue(TElement element) {
+    public final ListenableFuture enqueue(TElement element) {
         Preconditions.checkNotNull(element, "Can't enqueue null elements");
 
         if (Log.isDebugEnabled())
