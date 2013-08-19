@@ -7,7 +7,7 @@
     <groupId>java-reusables</groupId>
     <artifactId>java-reusables</artifactId>
     <packaging>pom</packaging>
-    <version>1.1</version>
+    <version>1.2</version>
     <modules>
         <module>java-reusables-threading</module>
         <module>java-reusables-common</module>

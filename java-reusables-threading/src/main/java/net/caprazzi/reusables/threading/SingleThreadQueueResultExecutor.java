@@ -1,52 +1,37 @@
 package net.caprazzi.reusables.threading;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
-public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecutor<TElement> {
+/**
+ * A QueueExecutor that uses a single thread to dequeue items.
+ */
+public abstract class SingleThreadQueueResultExecutor<TElement, TResult> implements ResultQueueExecutor<TElement, TResult> {
 
     private final Logger Log;
 
-    private final BlockingQueue<ElementListenableFuture<TElement>> queue = new LinkedBlockingQueue<ElementListenableFuture<TElement>>();
+    private final BlockingQueue<ElementListenableResult<TElement, TResult>> queue = new LinkedBlockingQueue<ElementListenableResult<TElement, TResult>>();
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public SingleThreadQueueExecutor() {
+    protected SingleThreadQueueResultExecutor() {
         Log = LoggerFactory.getLogger(this.getClass());
     }
 
-    @Override
-    public ListenableConfirmation enqueue(TElement element) {
-        Preconditions.checkNotNull(element, "Can't enqueue null elements");
-
-        if (Log.isDebugEnabled())
-            Log.debug("Adding element to queue: {}", element);
-
-        ElementListenableFuture future = ElementListenableFuture.create(element);
-
-        try {
-            queue.put(future);
-        } catch (InterruptedException e) {
-            Log.warn("Interrupted Exception while adding an element to internal queue.");
-            Thread.currentThread().interrupt();
-        }
-
-        return future;
-    }
-
-    protected abstract void doProcess(TElement element);
+    public abstract TResult doProcess(TElement element);
 
     @Override
-    public void start() {
+    public final void start() {
         executor.submit(new Runnable() {
             @Override
             public void run() {
                 while(!Thread.currentThread().isInterrupted() && !executor.isShutdown()) {
                     try {
-                        ElementListenableFuture<TElement> element = queue.take();
+                        ElementListenableResult<TElement, TResult> element = queue.take();
                         if (element == null) {
 
                             if (Log.isTraceEnabled())
@@ -59,8 +44,7 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
                             Log.trace("Processing element {}", element);
 
                         try {
-                            doProcess(element.getElement());
-                            element.setResult();
+                            element.setResult(doProcess(element.getElement()));
                             Log.trace("Processing complete for element {}", element);
 
                         }
@@ -77,8 +61,27 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
         });
     }
 
+    public final ListenableFuture enqueue(TElement element) {
+        Preconditions.checkNotNull(element, "Can't enqueue null elements");
+
+        if (Log.isDebugEnabled())
+            Log.debug("Adding element to queue: {}", element);
+
+        ElementListenableResult future = ElementListenableResult.create(element);
+
+        try {
+            queue.put(future);
+        } catch (InterruptedException e) {
+            Log.warn("Interrupted Exception while adding an element to internal queue.");
+            Thread.currentThread().interrupt();
+        }
+
+        return future;
+    }
+
     @Override
-    public void stop() {
+    public final void stop() {
         ExecutorUtils.shutdown(Log, executor, 2, TimeUnit.SECONDS);
     }
+
 }
