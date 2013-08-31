@@ -25,6 +25,11 @@ public abstract class SingleThreadQueueResultExecutor<TElement, TResult> impleme
     public abstract TResult doProcess(TElement element);
 
     @Override
+    public int size() {
+        return queue.size();
+    }
+
+    @Override
     public final void start() {
         executor.submit(new Runnable() {
             @Override

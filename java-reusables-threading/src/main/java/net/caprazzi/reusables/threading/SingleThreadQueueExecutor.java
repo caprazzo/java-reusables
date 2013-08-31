@@ -40,6 +40,11 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
     protected abstract void doProcess(TElement element);
 
     @Override
+    public int size() {
+        return queue.size();
+    }
+
+    @Override
     public void start() {
         executor.submit(new Runnable() {
             @Override
