@@ -14,11 +14,16 @@ public abstract class SingleThreadQueueResultExecutor<TElement, TResult> impleme
 
     private final Logger Log;
 
-    private final BlockingQueue<ElementListenableResult<TElement, TResult>> queue = new LinkedBlockingQueue<ElementListenableResult<TElement, TResult>>();
+    private final BlockingQueue<ElementListenableResult<TElement, TResult>> queue;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     protected SingleThreadQueueResultExecutor() {
+        this(Integer.MAX_VALUE);
+    }
+
+    protected SingleThreadQueueResultExecutor(int capacity) {
+        queue = new LinkedBlockingQueue<ElementListenableResult<TElement, TResult>>(capacity);
         Log = LoggerFactory.getLogger(this.getClass());
     }
 

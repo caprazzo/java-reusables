@@ -10,11 +10,16 @@ public abstract class SingleThreadQueueExecutor<TElement> implements QueueExecut
 
     private final Logger Log;
 
-    private final BlockingQueue<ElementListenableFuture<TElement>> queue = new LinkedBlockingQueue<ElementListenableFuture<TElement>>();
+    private final BlockingQueue<ElementListenableFuture<TElement>> queue;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public SingleThreadQueueExecutor() {
+        this(Integer.MAX_VALUE);
+    }
+
+    public SingleThreadQueueExecutor(int capacity) {
+        queue = new LinkedBlockingQueue<ElementListenableFuture<TElement>>(capacity);
         Log = LoggerFactory.getLogger(this.getClass());
     }
 
