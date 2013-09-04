@@ -8,11 +8,11 @@ public abstract class FormattedException extends Exception {
         super(ex);
     }
 
-    public FormattedException(Exception ex, String message, String... params) {
+    public FormattedException(Exception ex, String message, Object... params) {
         super(MessageFormat.format(message, params), ex);
     }
 
-    public FormattedException(String message, String... params) {
+    public FormattedException(String message, Object... params) {
         super(MessageFormat.format(message, params));
     }
 
